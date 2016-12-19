@@ -4,10 +4,10 @@ import PIL.Image
 import PIL.ExifTags
 
 root = "C:\Users\haynt\Desktop\Ema"
-PICTYPE = (".jpg")
+PICTYPE = (".jpg", ".jpeg")
 MOVTYPE = (".mov")
 
-# TODO: is this the most efficient way?
+# TODO: instead of prints, use logging.debug()
 
 def get_exif(filename):
     ret = {}
@@ -26,12 +26,12 @@ def get_min_date(path):
         exif_data = get_exif(path)
         # print "\tEXIF: {0}".format(exif_data)
         dates = [v for k, v in exif_data.items() if type(k) is str and "Date" in k]
-        print "\tDates: {0}".format(dates)
+        # print "\tDates: {0}".format(dates)
 
-        if not dates:  # TODO: consider how to make this both for photos and movies
+        if not dates:  # TODO: (FORK) consider how to make this both for photos and movies
             secs = os.path.getmtime((os.path.join(folderName, filename)))
             date = time.strftime("%Y-%m", time.gmtime(secs))
-            print "\tDate: {0}".format(date)
+            # print "\tDate: {0}".format(date)
         else:
             y, m = "", ""
             for date in dates:
@@ -43,21 +43,20 @@ def get_min_date(path):
                     if int(m) < int(temp_m):
                         y, m = temp_y, temp_m
             date = "-".join((y, m))
-            print "\t{0}".format(date)
+            # print "\tDate: {0}".format(date)
+        return date
 
-    # elif filename.lower().endswith(MOVTYPE):
-    #     print "\t{0}".format(os.path.join(folderName, filename))
-    #     secs = os.path.getmtime((os.path.join(folderName, filename)))  # TODO: get_exif may be where to test for pic or movie
-    #     print "\t\tDate: {0}".format(time.ctime(secs))
-    #     print "\t\tFormatted: {0}".format(time.strftime("%Y-%m", time.gmtime(secs)))
-    #     date = time.strftime("%Y-%m", time.gmtime(secs))
-    #     # TODO: if date is not a folder, create folder
-    #     print "\t\tPath: {0}".format(exists(os.path.join(root, date)))
-    #     # TODO: if movie name exists in folder, rename photo with next sequential number
-    #     # TODO: move movie to folder
-    #
-    # else:
-    #     print "\tDid not process: {0}".format(filename)
+    elif filename.lower().endswith(MOVTYPE):
+        # print "\t{0}".format(os.path.join(folderName, filename))
+        secs = os.path.getmtime((os.path.join(folderName, filename)))
+        # print "\t\tDate: {0}".format(time.ctime(secs))
+        date = time.strftime("%Y-%m", time.gmtime(secs))
+        # print "\tDate: {0}".format(date)
+        return date
+
+    else:
+        print "\tDid not process: {0}".format(filename)
+        return None  # not necessary, but cleaner
 
 # Check if file or folder parameter exists, return bool
 def exists(path):
@@ -76,7 +75,13 @@ if __name__ == "__main__":
             print "FILE INSIDE {0}: {1}".format(folderName, filename)
 
             date = get_min_date(os.path.join(folderName, filename))
+            print "\tDate: {0}".format(date)
+
             # TODO: if date is not a folder, create folder
             # print "\tPath: {0}".format(exists(os.path.join(root, date)))
             # TODO: if photo name exists in folder, rename photo with next sequential number
             # TODO: move photo to folder
+            # TODO: if date is not a folder, create folder
+            # print "\tPath: {0}".format(exists(os.path.join(root, date)))
+            # TODO: if movie name exists in folder, rename photo with next sequential number
+            # TODO: move movie to folder
